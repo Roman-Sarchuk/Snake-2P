@@ -2,7 +2,6 @@
 Snake for two players!
 
 ![alt text](photos/game.png "Game")
-![alt text](photos/lost.png "Lost")
 
 # Ukr:
 Щоб запустити можете скачати game.exe і запустити exe файл.
