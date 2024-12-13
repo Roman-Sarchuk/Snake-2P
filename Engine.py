@@ -1,49 +1,41 @@
-# my import
-import Attribute
+from Container import ContSnakeColor, ContApple, ContNet, NET
 import Head
 import Field
-import Net
 import Snake
 import Apple
 
 
-class ENGINE(Attribute.ATTRIBUTE):
-    def __init__(self, screen):
-        super(ENGINE, self).__init__()
-        # object
-        self.head = Head.HEAD(screen)
-        self.field = Field.FIELD(screen)
-        self.net = Net.NET()
-        self.snake1 = Snake.SNAKE(screen)
-        self.snake2 = Snake.SNAKE(screen)
-        self.apple = Apple.APPLE(screen)
+class OBJ:
+    head = Head.HEAD()
+    field = Field.FIELD()
+    snake1 = Snake.SNAKE()
+    snake2 = Snake.SNAKE()
+    apple = Apple.APPLE()
 
-        # other
-        self.__net = self.net.get()
-        self._snake1_way = None    # forward, backward, left, right
+
+class ENGINE(OBJ, ContSnakeColor):
+    def __init__(self):
+        # way: 'forward' / 'backward' / 'left' / 'right'
+        self._snake1_way = None
         self._snake2_way = None
-        self._count_apple = 0
 
-    # --- create display ---
     def create_display(self):
         """*** Creating main display: the head and the field ***"""
         self.head.draw()
         self.field.draw()
-    # ----------------------
 
     # --- spawn ---
     def spawn_snake(self):
         """*** The initial spawn of the snake ***"""
-        self.snake1.set_color(self._color_snake1_head, self._color_snake1_body)
-        self.__net = self.snake1.spawn(self.__net, 'left')
-        self.snake2.set_color(self._color_snake2_head, self._color_snake2_body)
-        self.__net = self.snake2.spawn(self.__net, 'right')
+        self.snake1.set_color(ContSnakeColor.color_snake1_head, ContSnakeColor.color_snake1_body)
+        self.snake1.spawn('left')
+        self.snake2.set_color(ContSnakeColor.color_snake2_head, ContSnakeColor.color_snake2_body)
+        self.snake2.spawn('right')
 
-    def spawn_apple(self):
+    def spawn_apple(self, number=1):
         """*** Create an apple if you don't have enough ***"""
-        if self._count_apple != self._max_apple:
-            self.__net = self.apple.spawn(self.__net)
-            self._count_apple += 1
+        for _ in range(number):
+            self.apple.spawn()
     # -------------
 
     # --- way ---
@@ -76,12 +68,13 @@ the flag must be: 'snake1' / 'snake2'""")
     # --- move ---
     def snake_move(self):
         """*** Snake move and check to eat ***"""
-        self.snake1.move(self.__net, self._snake1_way)
+        self.snake1.move(self._snake1_way)
         eat1 = self.snake1.eat()
-        self.snake2.move(self.__net, self._snake2_way)
+        self.snake2.move(self._snake2_way)
         eat2 = self.snake2.eat()
         if eat1 is True or eat2 is True:
-            self._count_apple -= 1
+            self.apple.subtract_count()
+            self.spawn_apple()
             self.head.score(self.snake1.eaten(), self.snake2.eaten())
     # ------------
 
@@ -102,3 +95,30 @@ the flag must be: 'snake1' / 'snake2'""")
         self.field.background()
         self.field.caption(lost)
     # -----------
+
+    # --- restart ---
+    @staticmethod
+    def __rest_net():
+        ContNet.net = NET().clear()
+
+    def __rest_window(self):
+        self.head.score()
+        self.field.background()
+
+    def __rest_snake(self):
+        self.set_way('snake1', None)
+        self.set_way('snake2', None)
+        self.snake1.clear()
+        self.snake2.clear()
+        self.spawn_snake()
+
+    def __rest_apple(self):
+        self.apple.clear()
+        self.spawn_apple(ContApple.count_apple)
+
+    def restart(self):
+        self.__rest_net()
+        self.__rest_window()
+        self.__rest_snake()
+        self.__rest_apple()
+    # ---------------
